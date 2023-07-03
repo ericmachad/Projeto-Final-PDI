@@ -17,31 +17,88 @@ class Linhas:
         self.y1 = y1
         self.y2 = y2
 
-def GerasimboloCasa(dp,validacao):
-    if(dp>=12 and validacao):
+def verificar_ponto_mais_alto(ponto1,ponto2):
+    if(ponto1<=ponto2):
+        return ponto1
+    if(ponto2<ponto1):
+        return ponto2
+    
+def verificar_ponto_mais_baixo(ponto1,ponto2):
+    if(ponto1>=ponto2):
+        return ponto1
+    if(ponto2>ponto1):
+        return ponto2    
+
+def verificar_ponto_mais_esquerda(ponto1,ponto2):
+    if(ponto1<=ponto2):
+        return ponto1
+    if(ponto2<ponto1):
+        return ponto2    
+
+def verificar_ponto_mais_direita(ponto1,ponto2):
+    if(ponto1>=ponto2):
+        return ponto1
+    if(ponto2>ponto1):
+        return ponto2
+         
+def gera_simbolo_casa(dp,validacao):
+    if(dp>=11 and validacao):
         return 'O'
-    if(dp < 12):
+    if(dp < 11):
         return ' '
     else:
         return 'X'
      
 def verificar_elemento_circular(imagem):
     cinza = cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
-    limiar, binaria = cv2.threshold(cinza, 127, 255, cv2.THRESH_BINARY)
-    contornos, _ = cv2.findContours(binaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    maior_contorno = max(contornos, key=cv2.contourArea)
+    blurred = cv2.GaussianBlur(cinza, (5, 5), 0)
+
+    edges = cv2.Canny(blurred, 50, 150)
+    contornos, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    circular_contornos = []
+    for contour in contornos:
+        approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
+        if len(approx) > 5:
+            circular_contornos.append(contour)
+    if(len(circular_contornos)<1):
+        return False        
+    maior_contorno = max(circular_contornos, key=cv2.contourArea)
     area = cv2.contourArea(maior_contorno)
     perimetro = cv2.arcLength(maior_contorno, True)
-    redondeza = (4 * np.pi * area) / (perimetro ** 2)
+    redondeza = 4 * np.pi * area / (perimetro ** 2)
+    print(redondeza)
+    image_with_contornos = cv2.drawContours(cinza, circular_contornos, -1, (0, 255, 0), 2)
+
+    # Mostrar a imagem original com os contornos aproximadamente circulares
+    cv2.imshow('Imagem com Contornos Circulares', image_with_contornos)
 
     if redondeza > 0.5 is not None:
         return True
 
-    return False      
+    return False     
 
-def geramatriz(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
+def gera_matriz(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
     print("",casa1,"|",casa2,"|",casa3,"\n","__________\n",casa4,"|",casa5,"|",casa6,"\n","__________\n",casa7,"|",casa8,"|",casa9)
 
+def define_vencedor(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
+    if(casa1==casa2 and casa2==casa3 and casa1!=' '):
+        print("O vencedor é o simbolo: ",casa1)
+    elif(casa4==casa5 and casa5==casa6 and casa4!=' '):
+        print("O vencedor é o simbolo:", casa4)
+    elif(casa7==casa8 and casa8==casa9 and casa7!=' '):
+        print("O vencedor é o simbolo:", casa7)
+    elif(casa1==casa4 and casa4==casa7 and casa1!=' '):
+        print("O vencedor é o simbolo:", casa1)
+    elif(casa2==casa5 and casa5==casa8 and casa2!=' '):
+        print("O vencedor é o simbolo:",casa2)
+    elif(casa3==casa6 and casa6==casa9 and casa3!=' '):
+        print("O vencedor é o simbolo: ",casa3)
+    elif(casa1==casa5 and casa5==casa9 and casa1!=' '):
+        print("O vencedor é o simbolo: ",casa1)
+    elif(casa3==casa6 and casa6==casa7 and casa3!=' '):
+        print("O vencedor é o simbolo: ",casa3)
+    else:
+        print("Não tem vencedor")                
 def encontrar_intersecao(x1, y1, x2, y2, x3, y3, x4, y4):
         if (y4 - y3) * (x2 - x1) == (y2 - y1) * (x4 - x3):
             return None
@@ -65,7 +122,7 @@ def main():
     def get_y2(linhas):
         return linhas.y2
 
-    img = cv2.imread("jogodavelha123.jpeg")
+    img = cv2.imread("jogodavelha7.jpeg")
     img_quadrados = img.copy()
     if img is None:
         print('Erro ao abrir a imagem.\n')
@@ -92,16 +149,7 @@ def main():
         elif np.abs(graus) >= 0 and np.abs(graus) < angle_threshold :
             linhas_horizontais.append(Linhas(x1, x2, y1, y2))
 
-    for i in linhas_horizontais:
-        cv2.line(img, (get_x1(i), get_y1(i)),
-                 (get_x2(i), get_y2(i)), (0, 0, 255), 2)
-    for i in linhas_verticais:
-        cv2.line(img, (get_x1(i), get_y1(i)),
-                 (get_x2(i), get_y2(i)), (255, 0, 255), 2)
-        
-    cv2.imshow('img2.jpg', img)
-    cv2.imwrite('img2.jpg', img * 255)
-    """Unificar linhas Verticais"""
+
     linhas_verticais.sort(key=get_x1)
     soma_x1 = get_x1(linhas_verticais[0])
     soma_x2 = get_x2(linhas_verticais[0])
@@ -203,36 +251,39 @@ def main():
                                        get_x2(linhas_horizontais_tabuleiro[1]), get_y2(linhas_horizontais_tabuleiro[1]),
                                        get_x1(linhas_verticais_tabuleiro[1]), get_y1(linhas_verticais_tabuleiro[1]),
                                        get_x2(linhas_verticais_tabuleiro[1]), get_y2(linhas_verticais_tabuleiro[1]))
-
-    quadrado1 = img_quadrados[get_y1(linhas_verticais_tabuleiro[0]): intersecao1[1] - 10,
+    pontomaisalto=verificar_ponto_mais_alto(get_y1(linhas_verticais_tabuleiro[0]),get_y1(linhas_verticais_tabuleiro[1]))
+    pontomaisbaixo=verificar_ponto_mais_baixo(get_y2(linhas_verticais_tabuleiro[0]),get_y2(linhas_verticais_tabuleiro[1]))
+    pontomaisesquerda=verificar_ponto_mais_esquerda(get_x1(linhas_horizontais_tabuleiro[0]),get_x1(linhas_horizontais_tabuleiro[1]))
+    pontomaisdireita=verificar_ponto_mais_direita(get_x2(linhas_horizontais_tabuleiro[0]),get_x2(linhas_horizontais_tabuleiro[1]))
+    quadrado1 = img_quadrados[pontomaisalto: intersecao1[1] - 10,
                     get_x1(linhas_horizontais_tabuleiro[0]): intersecao1[0] - 25]
 
     
-    quadrado2 = img_quadrados[get_y1(linhas_verticais_tabuleiro[0]): intersecao2[1] - 10,
+    quadrado2 = img_quadrados[pontomaisalto: intersecao2[1] - 10,
                 intersecao1[0] + 10: intersecao2[0] - 10]
     
-    quadrado3 = img_quadrados[get_y1(linhas_verticais_tabuleiro[0]): intersecao2[1] -10,
-                intersecao2[0] + 10: get_x2(linhas_horizontais_tabuleiro[0])]
+    quadrado3 = img_quadrados[pontomaisalto: intersecao2[1] -10,
+                intersecao2[0] + 10: pontomaisdireita]
     
 
     quadrado4 = img_quadrados[intersecao1[1] + 15: intersecao3[1] - 10,
-                    get_x1(linhas_horizontais_tabuleiro[1]): intersecao3[0] - 25]
+                    pontomaisesquerda: intersecao3[0] - 25]
 
     
     quadrado5 = img_quadrados[intersecao2[1] + 15: intersecao4[1] - 10,
                 intersecao3[0] + 10: intersecao4[0] - 15]
     
     quadrado6 = img_quadrados[intersecao2[1] + 15: intersecao4[1] - 10,
-                intersecao4[0] + 10: get_x2(linhas_horizontais_tabuleiro[1]) - 10]
+                intersecao4[0] + 10: pontomaisdireita - 10]
     
-    quadrado7 = img_quadrados[get_y1(linhas_horizontais_tabuleiro[1]) + 15: get_y2(linhas_verticais_tabuleiro[0]),
-                get_x1(linhas_horizontais_tabuleiro[1]) + 10: intersecao3[0] - 10]
+    quadrado7 = img_quadrados[get_y1(linhas_horizontais_tabuleiro[1]) + 15: pontomaisbaixo,
+                pontomaisesquerda + 10: intersecao3[0] - 10]
     
-    quadrado8 = img_quadrados[intersecao3[1] + 15: get_y2(linhas_verticais_tabuleiro[0]),
+    quadrado8 = img_quadrados[intersecao3[1] + 15: pontomaisbaixo,
                 intersecao3[0] + 10: intersecao4[0] - 10]
     
-    quadrado9 = img_quadrados[intersecao4[1] + 15: get_y2(linhas_verticais_tabuleiro[1]),
-                intersecao4[0] + 15: get_x2(linhas_horizontais_tabuleiro[1]) - 10]
+    quadrado9 = img_quadrados[intersecao4[1] + 15: pontomaisbaixo,
+                intersecao4[0] + 15: pontomaisdireita - 10]
 
     cv2.circle(img, (abs(intersecao1[0]), abs(intersecao1[1])),
                0, (0, 0, 0), 5)
@@ -291,18 +342,18 @@ def main():
     elered7=verificar_elemento_circular(quadrado7)
     elered8=verificar_elemento_circular(quadrado8)
     elered9=verificar_elemento_circular(quadrado9)
-    casa1=GerasimboloCasa(DPQUAD1,elered1)
-    casa2=GerasimboloCasa(DPQUAD2,elered2)
-    casa3=GerasimboloCasa(DPQUAD3,elered3)
-    casa4=GerasimboloCasa(DPQUAD4,elered4)
-    casa5=GerasimboloCasa(DPQUAD5,elered5)
-    casa6=GerasimboloCasa(DPQUAD6,elered6)
-    casa7=GerasimboloCasa(DPQUAD7,elered7)
-    casa8=GerasimboloCasa(DPQUAD8,elered8)
-    casa9=GerasimboloCasa(DPQUAD9,elered9)
+    casa1=gera_simbolo_casa(DPQUAD1,elered1)
+    casa2=gera_simbolo_casa(DPQUAD2,elered2)
+    casa3=gera_simbolo_casa(DPQUAD3,elered3)
+    casa4=gera_simbolo_casa(DPQUAD4,elered4)
+    casa5=gera_simbolo_casa(DPQUAD5,elered5)
+    casa6=gera_simbolo_casa(DPQUAD6,elered6)
+    casa7=gera_simbolo_casa(DPQUAD7,elered7)
+    casa8=gera_simbolo_casa(DPQUAD8,elered8)
+    casa9=gera_simbolo_casa(DPQUAD9,elered9)
 
-    geramatriz(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9)
-
+    gera_matriz(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9)
+    define_vencedor(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9)
     cv2.waitKey()
     cv2.destroyAllWindows()
 
