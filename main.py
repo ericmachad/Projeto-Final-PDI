@@ -66,7 +66,7 @@ def verificar_elemento_circular(imagem):
     area = cv2.contourArea(maior_contorno)
     perimetro = cv2.arcLength(maior_contorno, True)
     redondeza = 4 * np.pi * area / (perimetro ** 2)
-    print(redondeza)
+    """ print(redondeza) """
     image_with_contornos = cv2.drawContours(cinza, circular_contornos, -1, (0, 255, 0), 2)
 
     # Mostrar a imagem original com os contornos aproximadamente circulares
@@ -81,24 +81,37 @@ def gera_matriz(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
     print("",casa1,"|",casa2,"|",casa3,"\n","__________\n",casa4,"|",casa5,"|",casa6,"\n","__________\n",casa7,"|",casa8,"|",casa9)
 
 def define_vencedor(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
+    contvencedor = 0
     if(casa1==casa2 and casa2==casa3 and casa1!=' '):
-        print("O vencedor é o simbolo: ",casa1)
-    elif(casa4==casa5 and casa5==casa6 and casa4!=' '):
-        print("O vencedor é o simbolo:", casa4)
-    elif(casa7==casa8 and casa8==casa9 and casa7!=' '):
-        print("O vencedor é o simbolo:", casa7)
-    elif(casa1==casa4 and casa4==casa7 and casa1!=' '):
-        print("O vencedor é o simbolo:", casa1)
-    elif(casa2==casa5 and casa5==casa8 and casa2!=' '):
-        print("O vencedor é o simbolo:",casa2)
-    elif(casa3==casa6 and casa6==casa9 and casa3!=' '):
-        print("O vencedor é o simbolo: ",casa3)
-    elif(casa1==casa5 and casa5==casa9 and casa1!=' '):
-        print("O vencedor é o simbolo: ",casa1)
-    elif(casa3==casa5 and casa5==casa7 and casa3!=' '):
-        print("O vencedor é o simbolo: ",casa3)
-    else:
-        print("Não tem vencedor")                
+        vencedor = casa1
+        contvencedor=contvencedor+1
+    if(casa4==casa5 and casa5==casa6 and casa4!=' '):
+        vencedor = casa4
+        contvencedor=contvencedor+1
+    if(casa7==casa8 and casa8==casa9 and casa7!=' '):
+        vencedor = casa7
+        contvencedor=contvencedor+1
+    if(casa1==casa4 and casa4==casa7 and casa1!=' '):
+        vencedor = casa1
+        contvencedor = contvencedor+1
+    if(casa2==casa5 and casa5==casa8 and casa2!=' '):
+        vencedor = casa2
+        contvencedor = contvencedor+1
+    if(casa3==casa6 and casa6==casa9 and casa3!=' '):
+        vencedor = casa3
+        contvencedor = contvencedor+1
+    if(casa1==casa5 and casa5==casa9 and casa1!=' '):
+        vencedor = casa1
+        contvencedor = contvencedor+1
+    if(casa3==casa5 and casa5==casa7 and casa3!=' '):
+        vencedor = casa3
+        contvencedor = contvencedor+1
+    if(contvencedor==0):
+        print("Não tem vencedor")
+    if(contvencedor==1):
+        print("O vencedor é o simbolo: ",vencedor)
+    if(contvencedor>1):
+        print("O jogo está invalido, pois tem mais de 1 vencedor")                
 def encontrar_intersecao(x1, y1, x2, y2, x3, y3, x4, y4):
         if (y4 - y3) * (x2 - x1) == (y2 - y1) * (x4 - x3):
             return None
@@ -122,7 +135,7 @@ def main():
     def get_y2(linhas):
         return linhas.y2
 
-    img = cv2.imread("jogodavelha7.jpeg")
+    img = cv2.imread("jogodavelha123.jpeg")
     img_quadrados = img.copy()
     if img is None:
         print('Erro ao abrir a imagem.\n')
@@ -286,13 +299,13 @@ def main():
                 intersecao4[0] + 15: pontomaisdireita - 10]
 
     cv2.circle(img, (abs(intersecao1[0]), abs(intersecao1[1])),
-               0, (0, 0, 0), 5)
+               0, (0, 0, 0), 20)
     cv2.circle(img, (abs(intersecao2[0]), abs(intersecao2[1])),
-               0, (0, 0, 0), 5) 
+               0, (0, 0, 0), 20) 
     cv2.circle(img, (abs(intersecao3[0]), abs(intersecao3[1])),
-               0, (0, 0, 0), 5) 
+               0, (0, 0, 0), 20) 
     cv2.circle(img, (abs(intersecao4[0]), abs(intersecao4[1])),
-               0, (0, 0, 0), 5) 
+               0, (0, 0, 0), 20) 
     cv2.imshow('quadrado.jpg', quadrado1)
     cv2.imwrite('quadrado.jpg', quadrado1 * 255)
     cv2.imshow('quadrado2.jpg', quadrado2)
@@ -324,15 +337,15 @@ def main():
     DPQUAD7 = np.std(quadrado7)
     DPQUAD8 = np.std(quadrado8)
     DPQUAD9 = np.std(quadrado9)
-    print("X: ",DPQUAD1)
-    print("O: ",DPQUAD2)
-    print("X: ",DPQUAD3)
-    print("O: ",DPQUAD4)
-    print("O: ",DPQUAD5)
-    print("X: ",DPQUAD6)
-    print("X: ",DPQUAD7)
-    print("X: ",DPQUAD8)
-    print("O: ",DPQUAD9)
+    """ print("X: ",DPQUAD1)
+        print("O: ",DPQUAD2)
+        print("X: ",DPQUAD3)
+        print("O: ",DPQUAD4)
+        print("O: ",DPQUAD5)
+        print("X: ",DPQUAD6)
+        print("X: ",DPQUAD7)
+        print("X: ",DPQUAD8)
+        print("O: ",DPQUAD9) """
     elered1=verificar_elemento_circular(quadrado1)
     elered2=verificar_elemento_circular(quadrado2)
     elered3=verificar_elemento_circular(quadrado3)
