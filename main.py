@@ -95,7 +95,7 @@ def define_vencedor(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
         print("O vencedor é o simbolo: ",casa3)
     elif(casa1==casa5 and casa5==casa9 and casa1!=' '):
         print("O vencedor é o simbolo: ",casa1)
-    elif(casa3==casa6 and casa6==casa7 and casa3!=' '):
+    elif(casa3==casa5 and casa5==casa7 and casa3!=' '):
         print("O vencedor é o simbolo: ",casa3)
     else:
         print("Não tem vencedor")                
@@ -122,7 +122,7 @@ def main():
     def get_y2(linhas):
         return linhas.y2
 
-    img = cv2.imread("jogodavelha123.jpeg")
+    img = cv2.imread("jogodavelha7.jpeg")
     img_quadrados = img.copy()
     if img is None:
         print('Erro ao abrir a imagem.\n')
