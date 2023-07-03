@@ -42,9 +42,9 @@ def verificar_ponto_mais_direita(ponto1,ponto2):
         return ponto2
          
 def gera_simbolo_casa(dp,validacao):
-    if(dp>=11 and validacao):
+    if(dp>=10 and validacao):
         return 'O'
-    if(dp < 11):
+    if(dp < 10):
         return ' '
     else:
         return 'X'
@@ -72,7 +72,7 @@ def verificar_elemento_circular(imagem):
     # Mostrar a imagem original com os contornos aproximadamente circulares
     cv2.imshow('Imagem com Contornos Circulares', image_with_contornos)
 
-    if redondeza > 0.5 is not None:
+    if redondeza > 0.3 != None:
         return True
 
     return False     
@@ -122,7 +122,7 @@ def main():
     def get_y2(linhas):
         return linhas.y2
 
-    img = cv2.imread("jogodavelha7.jpeg")
+    img = cv2.imread("jogodavelha123.jpeg")
     img_quadrados = img.copy()
     if img is None:
         print('Erro ao abrir a imagem.\n')
@@ -266,7 +266,7 @@ def main():
                 intersecao2[0] + 10: pontomaisdireita]
     
 
-    quadrado4 = img_quadrados[intersecao1[1] + 15: intersecao3[1] - 10,
+    quadrado4 = img_quadrados[intersecao1[1] + 20: intersecao3[1] - 10,
                     pontomaisesquerda: intersecao3[0] - 25]
 
     
