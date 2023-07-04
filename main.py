@@ -42,41 +42,50 @@ def verificar_ponto_mais_direita(ponto1,ponto2):
         return ponto2
          
 def gera_simbolo_casa(dp,validacao):
-    if(dp>=10 and validacao):
+    if(dp>=10.4 and validacao):
         return 'O'
-    if(dp < 10):
+    if(dp < 10.4):
         return ' '
     else:
         return 'X'
-     
+    
+def calculate_roundness(contour):
+    perimeter = cv2.arcLength(contour, True)
+    area = cv2.contourArea(contour)
+    circularity = (4 * np.pi * area) / (perimeter ** 2)
+    return circularity    
+ 
 def verificar_elemento_circular(imagem):
     cinza = cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(cinza, (5, 5), 0)
+    blurred = cv2.GaussianBlur(cinza, (13, 13), 0)
+    # Aplicar o limiar (threshold)
+    threshold = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+    edges = cv2.Canny(threshold, 30, 100)
+    # Encontrar os contornos
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    edges = cv2.Canny(blurred, 50, 150)
-    contornos, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    circular_contornos = []
-    for contour in contornos:
-        approx = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
-        if len(approx) > 5:
-            circular_contornos.append(contour)
-    if(len(circular_contornos)<1):
-        return False        
-    maior_contorno = max(circular_contornos, key=cv2.contourArea)
-    area = cv2.contourArea(maior_contorno)
-    perimetro = cv2.arcLength(maior_contorno, True)
-    redondeza = 4 * np.pi * area / (perimetro ** 2)
-    """ print(redondeza) """
-    image_with_contornos = cv2.drawContours(cinza, circular_contornos, -1, (0, 255, 0), 2)
+    max_contour = None
+    max_area = 0
 
-    # Mostrar a imagem original com os contornos aproximadamente circulares
-    cv2.imshow('Imagem com Contornos Circulares', image_with_contornos)
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > max_area:
+            max_area = area
+            max_contour = contour
 
-    if redondeza > 0.3 != None:
-        return True
+    if max_contour is not None:
+        circularity = calculate_roundness(max_contour)
+        if circularity > 0.2:
+            return True
+        else:
+            return False
 
-    return False     
-
+        cv2.drawContours(imagem, [max_contour], -1, (0, 255, 0), 2)
+        cv2.imshow('Imagem com o maior contorno', imagem)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        return False
 def gera_matriz(casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9):
     print("",casa1,"|",casa2,"|",casa3,"\n","__________\n",casa4,"|",casa5,"|",casa6,"\n","__________\n",casa7,"|",casa8,"|",casa9)
 
@@ -135,7 +144,7 @@ def main():
     def get_y2(linhas):
         return linhas.y2
 
-    img = cv2.imread("jogodavelha123.jpeg")
+    img = cv2.imread("jogodavelha2.jpg")
     img_quadrados = img.copy()
     if img is None:
         print('Erro ao abrir a imagem.\n')
